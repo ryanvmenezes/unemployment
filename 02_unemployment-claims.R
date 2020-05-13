@@ -1,7 +1,7 @@
 library(tidyverse)
 library(lubridate)
 
-claims.states = read_csv('data/processed/unemployment/unemployment-claims-states-weekly.csv')
+claims.states = read_csv('processed/unemployment-claims-states-weekly.csv')
 
 claims.states
 
@@ -9,7 +9,7 @@ claims.states %>%
   group_by(state) %>% 
   filter(report.date == max(report.date))
 
-claims.usa = read_csv('data/processed/unemployment/unemployment-claims-usa-weekly.csv')
+claims.usa = read_csv('processed/unemployment-claims-usa-weekly.csv')
 
 claims.usa
 
@@ -99,6 +99,7 @@ plot.spike.states = spike.data.summary %>%
   ggplot(aes(new.claims.since.spike / 1e6, change.total.on.unemployment / 1e6)) +
   # geom_point(aes(size = labor.force)) +
   geom_text(aes(label = state.abbr)) +
+  geom_abline(slope = 1, intercept = 0) +
   xlab('Total new unemployment claims since spike (in millions)') +
   ylab('Change in number of people on unemployment since spike\n(in millions)') +
   theme_minimal() +
@@ -106,10 +107,9 @@ plot.spike.states = spike.data.summary %>%
 
 plot.spike.states
 
-spike.data.summary %>% write_csv('unemployment/tables/spike-summary-states.csv', na = '')
+spike.data.summary %>% write_csv('tables/spike-summary-states.csv', na = '')
 
-ggsave(filename = 'unemployment/plots/national-initial-claims.png', plot = plot.initial, width = 12, height = 8)
-ggsave(filename = 'unemployment/plots/national-weekly-claims.png', plot = plot.weekly, width = 12, height = 8)
-ggsave(filename = 'unemployment/plots/national-pct-unemployed.png', plot = plot.pct.unemployed, width = 12, height = 8)
-ggsave(filename = 'unemployment/plots/new-claims-additions-since-spike.png', plot = plot.spike.states, width = 12, height = 8)
-
+ggsave(filename = 'plots/national-initial-claims.png', plot = plot.initial, width = 12, height = 8)
+ggsave(filename = 'plots/national-weekly-claims.png', plot = plot.weekly, width = 12, height = 8)
+ggsave(filename = 'plots/national-pct-unemployed.png', plot = plot.pct.unemployed, width = 12, height = 8)
+ggsave(filename = 'plots/new-claims-additions-since-spike.png', plot = plot.spike.states, width = 12, height = 8)

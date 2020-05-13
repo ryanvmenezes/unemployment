@@ -1,7 +1,7 @@
 library(tidyverse)
 library(lubridate)
 
-counties = read_csv('data/processed/unemployment/bls-unemployment-14-months-counties.csv')
+counties = read_csv('processed/bls-unemployment-14-months-counties.csv')
 
 counties
 
@@ -74,5 +74,5 @@ compare.states = max.month.states %>%
 
 compare.states
 
-compare.counties %>% write_csv('unemployment/tables/county-unemployment-march-comparison.csv', na = '')
-compare.states %>% write_csv('unemployment/tables/state-unemployment-march-comparison.csv', na = '')
+compare.counties %>% write_csv('tables/county-unemployment-march-comparison.csv', na = '')
+compare.states %>% write_csv('tables/state-unemployment-march-comparison.csv', na = '')
