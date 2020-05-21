@@ -30,3 +30,6 @@ all.codes.now = all.codes %>%
   filter(end_year == '2020' & end_period == 'M04')
 
 all.codes.now %>% write_csv('ln-codes.csv')
+
+all.codes.now %>% 
+  count(orig_text)
