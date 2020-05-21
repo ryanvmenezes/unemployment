@@ -20,3 +20,31 @@ download.file(
   'https://download.bls.gov/pub/time.series/la/la.data.64.County',
   'raw/la.data.64.County.tsv'
 )
+
+# LN	Labor Force Statistics from the Current Population Survey (NAICS)
+
+download.file(
+  'https://download.bls.gov/pub/time.series/ln/ln.data.1.AllData',
+  'raw/ln.data.1.AllData.tsv'
+)
+
+download.file(
+  'https://download.bls.gov/pub/time.series/ln/ln.series',
+  'raw/ln.series.tsv'
+)
+
+codebooks = c(
+  'ln.absn','ln.activity','ln.ages','ln.born','ln.cert',
+  'ln.chld','ln.class','ln.disa','ln.duration','ln.education',
+  'ln.entr','ln.expr','ln.footnote','ln.hheader','ln.hour',
+  'ln.indy','ln.jdes','ln.lfst','ln.look','ln.mari',
+  'ln.mjhs','ln.occupation','ln.orig','ln.pcts','ln.periodicity',
+  'ln.race','ln.rjnw','ln.rnlf','ln.rwns','ln.seasonal',
+  'ln.seek','ln.sexs','ln.tdat','ln.vets','ln.wkst'
+)
+
+walk2(
+  paste('https://download.bls.gov/pub/time.series/ln/', codebooks, sep = ''),
+  paste('raw/codes.', codebooks, '.tsv', sep = ''),
+  download.file
+)
