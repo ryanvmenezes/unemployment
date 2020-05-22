@@ -76,3 +76,35 @@ compare.states
 
 compare.counties %>% write_csv('tables/county-unemployment-march-comparison.csv', na = '')
 compare.states %>% write_csv('tables/state-unemployment-march-comparison.csv', na = '')
+
+counties = read_csv('processed/bls-unemployment-counties.csv')
+
+counties %>% 
+  filter(state.abbr == 'CA') %>% 
+  filter(report.month >= '2015-01-01') %>% 
+  ggplot(aes(report.month, unemployment.rate, group = county)) +
+  geom_line(alpha = 0.1) +
+  geom_line(
+    data = . %>% 
+      filter(report.month >= '2019-01-01'),
+    # alpha = 0.3,
+    aes(color = county)
+  ) +
+  geom_point(
+    data = . %>% 
+      group_by(county.fips) %>% 
+      filter(report.month == max(report.month)),
+    aes(color = county)
+  ) +
+  geom_text(
+    data = . %>% 
+      group_by(county.fips) %>% 
+      filter(report.month == max(report.month)) %>% 
+      arrange(-unemployment.rate) %>% 
+      head(5),
+    aes(label = word(county), color = county),
+    hjust = 'left',
+    nudge_x = 10
+  ) +
+  theme_minimal() +
+  theme(legend.position = 'none')
