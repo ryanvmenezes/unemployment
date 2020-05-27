@@ -35,6 +35,8 @@ bls.counties = read_lines('raw/laucntycur14.txt') %>%
 
 bls.counties
 
+bls.counties %>% tail()
+
 bls.counties %>% write_csv('processed/bls-unemployment-14-months-counties.csv', na = '')
 
 # bls state statistics ----------------------------------------------------
@@ -52,7 +54,7 @@ bls.state.table.ids = tribble(
 
 bls.state.table.ids
 
-bls.states = read_tsv('raw/la.data.2.AllStatesU.tsv') %>% 
+bls.states = read_tsv('raw/la.data.3.AllStatesS.tsv') %>% 
   filter(period != 'M13') %>% 
   mutate(
     state.fips = str_sub(series_id, start = 6, end = 7),
@@ -101,6 +103,63 @@ bls.counties = bls.counties.raw %>%
 bls.counties
 
 bls.counties %>% write_csv('processed/bls-unemployment-counties.csv', na = '')
+
+
+# edd california data -----------------------------------------------------
+
+california = read_csv('raw/edd-california.csv')
+
+california %>% count(`Area Type`)
+
+california %>% 
+  filter(`Area Type` == 'Sub-County Place') %>% 
+  count(`Area Name`)
+
+seasonally.adjusted.data.points = california %>%
+  distinct(`Area Name`, `Seasonally Adjusted (Y/N)`) %>%
+  filter(`Seasonally Adjusted (Y/N)` == 'Y')
+
+seasonally.adjusted.data.points
+
+ca.counties = california %>% 
+  filter(`Area Type` == 'County') %>% 
+  filter(`Seasonally Adjusted (Y/N)` != 'Y') %>% 
+  select(-`Area Type`) %>% 
+  transmute(
+    county = `Area Name`,
+    date = mdy(Date),
+    labor.force = `Labor Force`,
+    employed = `Employment`,
+    unemployment = `Unemployment`,
+    unemployment.rate = round(unemployment / labor.force * 100, 1)
+  ) %>% 
+  distinct()
+
+ca.counties
+
+ca.counties %>% tail()
+
+ca.counties %>% write_csv('processed/edd-california-counties.csv')
+
+# ca.cities.cdps = california %>% 
+#   filter(`Area Type` == 'Sub-County Place') %>% 
+#   filter(`Seasonally Adjusted (Y/N)` != 'Y') %>% 
+#   select(-`Area Type`) %>% 
+#   transmute(
+#     county = `Area Name`,
+#     date = mdy(Date),
+#     labor.force = `Labor Force`,
+#     employed = `Employment`,
+#     unemployment = `Unemployment`,
+#     unemployment.rate = round(unemployment / labor.force * 100, 1)
+#   ) %>% 
+#   arrange(date)
+# 
+# ca.cities.cdps
+# 
+# tail(ca.cities.cdps)
+
+
 
 # dept of labor unemployment claims ---------------------------------------
 

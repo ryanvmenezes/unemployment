@@ -10,8 +10,8 @@ download.file(
 # all bls state statistics (lau)
 
 download.file(
-  'https://download.bls.gov/pub/time.series/la/la.data.2.AllStatesU',
-  'raw/la.data.2.AllStatesU.tsv'
+  'https://download.bls.gov/pub/time.series/la/la.data.3.AllStatesS',
+  'raw/la.data.3.AllStatesS.tsv'
 )
 
 # all bls county statistics (lau)
@@ -19,6 +19,13 @@ download.file(
 download.file(
   'https://download.bls.gov/pub/time.series/la/la.data.64.County',
   'raw/la.data.64.County.tsv'
+)
+
+# lau for california
+
+download.file(
+  'https://data.edd.ca.gov/api/views/e6gw-gvii/rows.csv?accessType=DOWNLOAD',
+  'raw/edd-california.csv'
 )
 
 # LN	Labor Force Statistics from the Current Population Survey (NAICS)
