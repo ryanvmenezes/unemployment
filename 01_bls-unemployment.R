@@ -1,6 +1,5 @@
 library(tidyverse)
 library(lubridate)
-library(glue)
 
 counties = read_csv('processed/bls-unemployment-counties.csv')
 
