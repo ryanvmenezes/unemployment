@@ -1,7 +1,8 @@
 library(tidyverse)
 library(lubridate)
+library(glue)
 
-counties = read_csv('processed/bls-unemployment-14-months-counties.csv')
+counties = read_csv('processed/bls-unemployment-counties.csv')
 
 counties
 
@@ -22,30 +23,27 @@ compare.counties = max.month.counties %>%
   left_join(
     max.month.counties %>% 
       filter(report.year == 2020),
-    by = c("laus.code", "state.fips", "county.fips", "county", "state.abbr"),
+    by = c("state.fips", "county.fips"),
     suffix = c('.19', '.20')
   ) %>% 
-  mutate(unemp.rate.diff = round(rate.unemployed.20 - rate.unemployed.19, 1)) %>% 
+  mutate(unemp.rate.diff = round(unemployment.rate.20 - unemployment.rate.19, 1)) %>% 
   select(
-    state.fips, county.fips, county, state.abbr,
-    report.month.19, civilian.labor.force.19, unemployed.19, rate.unemployed.19,
-    report.month.20, civilian.labor.force.20, unemployed.20, rate.unemployed.20,
+    state.fips, county.fips,
+    report.month.19, labor.force.19, unemployment.19, unemployment.rate.19,
+    report.month.20, labor.force.20, unemployment.20, unemployment.rate.20,
     unemp.rate.diff
   ) %>% 
   arrange(-unemp.rate.diff)
 
-compare.counties %>% arrange(-unemp.rate.diff)
-
 compare.counties
 
 states = counties %>% 
-  group_by(state.fips, state.abbr, report.month) %>% 
+  group_by(state.fips, report.month) %>% 
   summarise(
-    civilian.labor.force = sum(civilian.labor.force),
-    employed = sum(employed),
-    unemployed = sum(unemployed)
+    labor.force = sum(labor.force),
+    unemployment = sum(unemployment)
   ) %>% 
-  mutate(rate.unemployed = round(unemployed / civilian.labor.force * 100, 1))
+  mutate(unemployment.rate = round(unemployment / labor.force * 100, 1))
 
 states
 
@@ -60,51 +58,19 @@ compare.states = max.month.states %>%
   left_join(
     max.month.states %>% 
       filter(report.year == 2020),
-    by = c("state.fips", "state.abbr"),
+    by = "state.fips",
     suffix = c('.19', '.20')
   ) %>% 
-  mutate(unemp.rate.diff = round(rate.unemployed.20 - rate.unemployed.19, 1)) %>% 
+  mutate(unemp.rate.diff = round(unemployment.rate.20 - unemployment.rate.19, 1)) %>% 
   select(
-    state.fips, state.abbr,
-    report.month.19, civilian.labor.force.19, unemployed.19, rate.unemployed.19,
-    report.month.20, civilian.labor.force.20, unemployed.20, rate.unemployed.20,
+    state.fips,
+    report.month.19, labor.force.19, unemployment.19, unemployment.rate.19,
+    report.month.20, labor.force.20, unemployment.20, unemployment.rate.20,
     unemp.rate.diff
   ) %>% 
   arrange(-unemp.rate.diff)
 
 compare.states
 
-compare.counties %>% write_csv('tables/county-unemployment-march-comparison.csv', na = '')
-compare.states %>% write_csv('tables/state-unemployment-march-comparison.csv', na = '')
-
-counties = read_csv('processed/bls-unemployment-counties.csv')
-
-counties %>% 
-  filter(state.abbr == 'CA') %>% 
-  filter(report.month >= '2015-01-01') %>% 
-  ggplot(aes(report.month, unemployment.rate, group = county)) +
-  geom_line(alpha = 0.1) +
-  geom_line(
-    data = . %>% 
-      filter(report.month >= '2019-01-01'),
-    # alpha = 0.3,
-    aes(color = county)
-  ) +
-  geom_point(
-    data = . %>% 
-      group_by(county.fips) %>% 
-      filter(report.month == max(report.month)),
-    aes(color = county)
-  ) +
-  geom_text(
-    data = . %>% 
-      group_by(county.fips) %>% 
-      filter(report.month == max(report.month)) %>% 
-      arrange(-unemployment.rate) %>% 
-      head(5),
-    aes(label = word(county), color = county),
-    hjust = 'left',
-    nudge_x = 10
-  ) +
-  theme_minimal() +
-  theme(legend.position = 'none')
+compare.counties %>% write_csv('tables/county-unemployment-comparison.csv', na = '')
+compare.states %>% write_csv('tables/state-unemployment-comparison.csv', na = '')

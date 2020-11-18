@@ -4,40 +4,40 @@ library(lubridate)
 fips = read_csv('raw/fips.csv')
 
 fips
-
-# bls unemployment rate by county -----------------------------------------
-
-bls.counties = read_lines('raw/laucntycur14.txt') %>% 
-  head(-6) %>% 
-  tail(-6) %>% 
-  paste(collapse = "\n") %>% 
-  read_delim(delim = '|', trim_ws = TRUE, col_names = FALSE) %>% 
-  rename(
-    laus.code = X1,
-    state.fips = X2,
-    county.fips = X3,
-    area.name = X4,
-    report.month = X5,
-    civilian.labor.force = X6,
-    employed = X7,
-    unemployed = X8,
-    rate.unemployed = X9,
-  ) %>% 
-  separate(report.month, into = c('report.month', 'preliminary'), sep = '\\(', extra = 'drop', fill = 'right') %>% 
-  mutate(preliminary = !is.na(preliminary)) %>% 
-  mutate(area.name = if_else(area.name == 'District of Columbia', 'District of Columbia, DC', area.name)) %>% 
-  separate(area.name, into = c('county', 'state.abbr'), sep = ', ') %>% 
-  mutate(
-    report.month = str_replace(report.month, '-', '-01-'),
-    report.month = mdy(report.month)
-  ) %>% 
-  arrange(laus.code, state.fips, county.fips, report.month)
-
-bls.counties
-
-bls.counties %>% tail()
-
-bls.counties %>% write_csv('processed/bls-unemployment-14-months-counties.csv', na = '')
+ 
+# # bls unemployment rate by county -----------------------------------------
+# 
+# bls.counties = read_lines('raw/laucntycur14.txt') %>% 
+#   head(-6) %>% 
+#   tail(-6) %>% 
+#   paste(collapse = "\n") %>% 
+#   read_delim(delim = '|', trim_ws = TRUE, col_names = FALSE) %>% 
+#   rename(
+#     laus.code = X1,
+#     state.fips = X2,
+#     county.fips = X3,
+#     area.name = X4,
+#     report.month = X5,
+#     civilian.labor.force = X6,
+#     employed = X7,
+#     unemployed = X8,
+#     rate.unemployed = X9,
+#   ) %>% 
+#   separate(report.month, into = c('report.month', 'preliminary'), sep = '\\(', extra = 'drop', fill = 'right') %>% 
+#   mutate(preliminary = !is.na(preliminary)) %>% 
+#   mutate(area.name = if_else(area.name == 'District of Columbia', 'District of Columbia, DC', area.name)) %>% 
+#   separate(area.name, into = c('county', 'state.abbr'), sep = ', ') %>% 
+#   mutate(
+#     report.month = str_replace(report.month, '-', '-01-'),
+#     report.month = mdy(report.month)
+#   ) %>% 
+#   arrange(laus.code, state.fips, county.fips, report.month)
+# 
+# bls.counties
+# 
+# bls.counties %>% tail()
+# 
+# bls.counties %>% write_csv('processed/bls-unemployment-14-months-counties.csv', na = '')
 
 # bls state statistics ----------------------------------------------------
 
@@ -67,11 +67,11 @@ bls.states = read_tsv('raw/la.data.3.AllStatesS.tsv') %>%
     report.month = ymd(report.month)
   ) %>% 
   left_join(bls.state.table.ids) %>% 
-  left_join(
-    fips %>% 
-      distinct(state.fips, state, state.abbr)
-  ) %>% 
-  select(state.fips, state, state.abbr, report.month, data.value, value) %>% 
+  # left_join(
+  #   fips %>% 
+  #     distinct(state.fips, state, state.abbr)
+  # ) %>% 
+  select(state.fips, report.month, data.value, value) %>% 
   pivot_wider(names_from = 'data.value', values_from = 'value')
 
 bls.states
@@ -96,8 +96,8 @@ bls.counties = bls.counties.raw %>%
     report.month = ymd(report.month)
   ) %>% 
   left_join(bls.state.table.ids) %>% 
-  left_join(fips) %>% 
-  select(state.fips, county.fips, county, state, state.abbr, report.month, data.value, value) %>% 
+  # left_join(fips) %>% 
+  select(state.fips, county.fips, report.month, data.value, value) %>% 
   pivot_wider(names_from = 'data.value', values_from = 'value')
 
 bls.counties
@@ -105,41 +105,41 @@ bls.counties
 bls.counties %>% write_csv('processed/bls-unemployment-counties.csv', na = '')
 
 
-# edd california data -----------------------------------------------------
-
-california = read_csv('raw/edd-california.csv')
-
-california %>% count(`Area Type`)
-
-california %>% 
-  filter(`Area Type` == 'Sub-County Place') %>% 
-  count(`Area Name`)
-
-seasonally.adjusted.data.points = california %>%
-  distinct(`Area Name`, `Seasonally Adjusted (Y/N)`) %>%
-  filter(`Seasonally Adjusted (Y/N)` == 'Y')
-
-seasonally.adjusted.data.points
-
-ca.counties = california %>% 
-  filter(`Area Type` == 'County') %>% 
-  filter(`Seasonally Adjusted (Y/N)` != 'Y') %>% 
-  select(-`Area Type`) %>% 
-  transmute(
-    county = `Area Name`,
-    date = mdy(Date),
-    labor.force = `Labor Force`,
-    employed = `Employment`,
-    unemployment = `Unemployment`,
-    unemployment.rate = round(unemployment / labor.force * 100, 1)
-  ) %>% 
-  distinct()
-
-ca.counties
-
-ca.counties %>% tail()
-
-ca.counties %>% write_csv('processed/edd-california-counties.csv')
+# # edd california data -----------------------------------------------------
+# 
+# california = read_csv('raw/edd-california.csv')
+# 
+# california %>% count(`Area Type`)
+# 
+# california %>% 
+#   filter(`Area Type` == 'Sub-County Place') %>% 
+#   count(`Area Name`)
+# 
+# seasonally.adjusted.data.points = california %>%
+#   distinct(`Area Name`, `Seasonally Adjusted (Y/N)`) %>%
+#   filter(`Seasonally Adjusted (Y/N)` == 'Y')
+# 
+# seasonally.adjusted.data.points
+# 
+# ca.counties = california %>% 
+#   filter(`Area Type` == 'County') %>% 
+#   filter(`Seasonally Adjusted (Y/N)` != 'Y') %>% 
+#   select(-`Area Type`) %>% 
+#   transmute(
+#     county = `Area Name`,
+#     date = mdy(Date),
+#     labor.force = `Labor Force`,
+#     employed = `Employment`,
+#     unemployment = `Unemployment`,
+#     unemployment.rate = round(unemployment / labor.force * 100, 1)
+#   ) %>% 
+#   distinct()
+# 
+# ca.counties
+# 
+# ca.counties %>% tail()
+# 
+# ca.counties %>% write_csv('processed/edd-california-counties.csv')
 
 # ca.cities.cdps = california %>% 
 #   filter(`Area Type` == 'Sub-County Place') %>% 
@@ -181,10 +181,10 @@ claims = CLAIMS %>%
     covered.employment = c18,
     # insured.unemployment.rate = c19
   ) %>%
-  left_join(fips %>% distinct(state, state.abbr)) %>% 
-  left_join(bls.states %>% select(state.abbr, report.month, labor.force)) %>% 
-  select(state, everything()) %>% 
-  group_by(state.abbr) %>% 
+  left_join(fips %>% distinct(state.abbr, state.fips)) %>%
+  left_join(bls.states %>% select(state.fips, report.month, labor.force)) %>% 
+  select(state.fips, state.abbr, everything()) %>% 
+  group_by(state.fips, state.abbr) %>% 
   fill(labor.force, .direction = 'down') %>% 
   mutate(pct.unemployed = (initial.claims + continued.claims) / labor.force) %>% 
   ungroup()

@@ -6,7 +6,7 @@ claims.states = read_csv('processed/unemployment-claims-states-weekly.csv')
 claims.states
 
 claims.states %>% 
-  group_by(state) %>% 
+  group_by(state.abbr) %>% 
   filter(report.date == max(report.date))
 
 claims.usa = read_csv('processed/unemployment-claims-usa-weekly.csv')
@@ -45,22 +45,22 @@ plot.pct.unemployed = claims.usa %>%
 
 plot.pct.unemployed
 
-claims.usa %>%
-  filter(report.date >= '2020-01-01') %>%
-  ggplot(aes(report.date, continued.claims)) +
-  geom_line() +
-  geom_vline(xintercept = ymd('2020-03-24')) +
-  geom_point() +
-  geom_text(aes(label = week.number), color = 'red')
+# claims.usa %>%
+#   filter(report.date >= '2020-01-01') %>%
+#   ggplot(aes(report.date, continued.claims)) +
+#   geom_line() +
+#   geom_vline(xintercept = ymd('2020-03-24')) +
+#   geom_point() +
+#   geom_text(aes(label = week.number), color = 'red')
 
-# last week before spike vs. now
+# last week before spike was week 11
 
 post.spike.data = claims.states %>% 
   filter(year(reflected.week.ending) == 2020) %>% 
   filter(week.number > 11)
 
 post.spike.data.summary = post.spike.data %>% 
-  group_by(state, state.abbr) %>% 
+  group_by(state.fips, state.abbr) %>% 
   summarise(
     new.claims.since.spike = sum(initial.claims),
     latest.total.on.unemployment = last(continued.claims),
@@ -73,7 +73,7 @@ post.spike.data.summary
 pre.spike.data.summary = claims.states %>% 
   filter(year(reflected.week.ending) == 2020) %>% 
   filter(week.number == 11) %>% 
-  select(state, state.abbr, pre.spike.total.on.unemployment = continued.claims, pre.spike.pct.unemployed = pct.unemployed)
+  select(state.fips, state.abbr, pre.spike.total.on.unemployment = continued.claims, pre.spike.pct.unemployed = pct.unemployed)
   
 pre.spike.data.summary
 
@@ -112,4 +112,4 @@ spike.data.summary %>% write_csv('tables/spike-summary-states.csv', na = '')
 ggsave(filename = 'plots/national-initial-claims.png', plot = plot.initial, width = 12, height = 8)
 ggsave(filename = 'plots/national-weekly-claims.png', plot = plot.weekly, width = 12, height = 8)
 ggsave(filename = 'plots/national-pct-unemployed.png', plot = plot.pct.unemployed, width = 12, height = 8)
-ggsave(filename = 'plots/new-claims-additions-since-spike.png', plot = plot.spike.states, width = 12, height = 8)
+# ggsave(filename = 'plots/new-claims-additions-since-spike.png', plot = plot.spike.states, width = 12, height = 8)
