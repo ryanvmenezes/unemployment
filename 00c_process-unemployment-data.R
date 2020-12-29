@@ -4,40 +4,6 @@ library(lubridate)
 fips = read_csv('raw/fips.csv')
 
 fips
- 
-# # bls unemployment rate by county -----------------------------------------
-# 
-# bls.counties = read_lines('raw/laucntycur14.txt') %>% 
-#   head(-6) %>% 
-#   tail(-6) %>% 
-#   paste(collapse = "\n") %>% 
-#   read_delim(delim = '|', trim_ws = TRUE, col_names = FALSE) %>% 
-#   rename(
-#     laus.code = X1,
-#     state.fips = X2,
-#     county.fips = X3,
-#     area.name = X4,
-#     report.month = X5,
-#     civilian.labor.force = X6,
-#     employed = X7,
-#     unemployed = X8,
-#     rate.unemployed = X9,
-#   ) %>% 
-#   separate(report.month, into = c('report.month', 'preliminary'), sep = '\\(', extra = 'drop', fill = 'right') %>% 
-#   mutate(preliminary = !is.na(preliminary)) %>% 
-#   mutate(area.name = if_else(area.name == 'District of Columbia', 'District of Columbia, DC', area.name)) %>% 
-#   separate(area.name, into = c('county', 'state.abbr'), sep = ', ') %>% 
-#   mutate(
-#     report.month = str_replace(report.month, '-', '-01-'),
-#     report.month = mdy(report.month)
-#   ) %>% 
-#   arrange(laus.code, state.fips, county.fips, report.month)
-# 
-# bls.counties
-# 
-# bls.counties %>% tail()
-# 
-# bls.counties %>% write_csv('processed/bls-unemployment-14-months-counties.csv', na = '')
 
 # bls state statistics ----------------------------------------------------
 
@@ -54,7 +20,7 @@ bls.state.table.ids = tribble(
 
 bls.state.table.ids
 
-bls.states = read_tsv('raw/la.data.3.AllStatesS.tsv') %>% 
+bls.states = read_tsv('raw/la/la.data.3.AllStatesS.tsv') %>% 
   filter(period != 'M13') %>% 
   mutate(
     state.fips = str_sub(series_id, start = 6, end = 7),
@@ -80,7 +46,7 @@ bls.states %>% write_csv('processed/bls-unemployment-states.csv', na = '')
 
 # bls county data ---------------------------------------------------------
 
-bls.counties.raw = read_tsv('raw/la.data.64.County.tsv')
+bls.counties.raw = read_tsv('raw/la/la.data.64.County.tsv')
 
 bls.counties = bls.counties.raw %>% 
   filter(period != 'M13') %>% 

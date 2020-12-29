@@ -2,16 +2,16 @@ library(tidyverse)
 
 # data = read_tsv('raw/ln.data.1.AllData.tsv')
 
-codes = read_tsv('raw/ln.series.tsv', col_types = cols(.default = 'c')) %>% 
+codes = read_tsv('raw/ln/ln.series.tsv', col_types = cols(.default = 'c')) %>% 
   rename(seasonal_code = seasonal, footnote_code = footnote_codes)
 
 codes
 
-data.dir = 'raw/'
+data.dir = 'raw/ln/'
 codebooks = list.files(data.dir) %>% 
   `[`(str_detect(., 'codes')) %>% 
-  # set_names(., str_replace_all(., 'codes.ln.|.tsv', '')) %>%
   str_c(data.dir, .) %>%
+  set_names(., str_replace_all(., 'raw/ln/codes.ln.|.tsv', '')) %>%
   map(read_tsv, col_types = cols(.default = 'c'))
 
 codebooks
@@ -27,9 +27,13 @@ all.codes = reduce(prepend(codebooks, list(codes)), left_join, .dir = 'forward')
 all.codes
 
 all.codes.now = all.codes %>% 
-  filter(end_year == '2020' & end_period == 'M04')
+  filter(end_year == '2020' & end_period == 'M11')
 
-all.codes.now %>% write_csv('ln-codes.csv')
+all.codes.now %>% write_csv('ln-codes.csv', na = '')
 
 all.codes.now %>% 
   count(orig_text)
+
+ln = read_tsv('raw/ln/ln.data.1.AllData.tsv')
+
+ln
