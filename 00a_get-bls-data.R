@@ -45,9 +45,29 @@ purrr::walk2(
 )
 
 
+# State and Area Employment, Hours and Earnings (SM)
+
+download.file(
+  'https://download.bls.gov/pub/time.series/sm/sm.data.5c.California',
+  'raw/sm/sm.data.5c.California.tsv'
+)
 
 
+download.file(
+  'https://download.bls.gov/pub/time.series/sm/sm.series',
+  'raw/sm/sm.series.tsv'
+)
 
+codebooks = c(
+  'sm.area','sm.data_type','sm.footnote','sm.industry',
+  'sm.state','sm.supersector'
+)
+
+purrr::walk2(
+  paste('https://download.bls.gov/pub/time.series/sm/', codebooks, sep = ''),
+  paste('raw/sm/codes.', codebooks, '.tsv', sep = ''),
+  download.file
+)
 
 # # bls unemployment by county
 # 
